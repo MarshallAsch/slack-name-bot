@@ -1,4 +1,4 @@
-require('dotenv').config({ path: process.cwd() + '/config' });
+require('dotenv').config({ path: process.cwd() + '/config/.env' });
 
 const express = require('express');
 const bodyParser = require('body-parser');
