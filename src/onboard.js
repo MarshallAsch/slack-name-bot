@@ -2,7 +2,7 @@ const qs = require('querystring');
 const axios = require('axios');
 const JsonDB = require('node-json-db');
 
-const db = new JsonDB('users', true, false);
+const db = new JsonDB('config/users', true, false);
 
 const apiUrl = 'https://slack.com/api';
 

@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config({ path: process.cwd() + '/config' });
 
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -44,7 +44,7 @@ app.post('/events', (req, res) => {
       if (signature.isVerified(req)) {
         const event = req.body.event;
         console.log(event);
-        
+
         // `team_join` is fired whenever a new user (incl. a bot) joins the team
         if (event.type === 'team_join' && !event.is_bot) {
           const { team_id, id } = event.user;
@@ -60,7 +60,7 @@ app.post('/events', (req, res) => {
 });
 
 /*
- * Endpoint to receive events from interactive message on Slack. 
+ * Endpoint to receive events from interactive message on Slack.
  * Verify the signing secret before continuing.
  */
 app.post('/interactive', (req, res) => {
@@ -73,6 +73,6 @@ app.post('/interactive', (req, res) => {
   } else { res.sendStatus(500); }
 });
 
-const server = app.listen(process.env.PORT || 5000, () => {
+const server = app.listen(5000, () => {
   console.log('Express server listening on port %d in %s mode', server.address().port, app.settings.env);
 });
