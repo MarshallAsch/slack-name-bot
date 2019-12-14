@@ -68,34 +68,42 @@ class User {
 
     setEmail(email) {
         this._model.email = email;
+        return this;
     }
 
     setRealName(name) {
         this._model.real_name = name;
+        return this;
     }
 
     setDisplayName(name) {
         this._model.display_name = name;
+        return this;
     }
 
     setUserId(id) {
         this._model.user_id = id;
+        return this;
     }
 
     setTeamId(id) {
         this._model.team_id = id;
+        return this;
     }
 
     setDeleted(del) {
         this._model.deleted = del;
+        return this;
     }
 
     setUpdated(time) {
         this._model.update = time;
+        return this;
     }
 
     setEvent(event) {
         this._model.event = event;
+        return this;
     }
 
 
