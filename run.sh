@@ -18,8 +18,23 @@ if [ ! -f "config/.env" ]; then
         exit 1
     fi
 
+    # database config
+
+    if [ -z "$DATABASE" ]
+    then
+        echo "Must set the DATABASE variable"
+        exit 1
+    fi
+
+
     echo "SLACK_ACCESS_TOKEN=$SLACK_ACCESS_TOKEN" > config/.env
     echo "SLACK_SIGNING_SECRET=$SLACK_SIGNING_SECRET" >> config/.env
+    echo "DATABASE=$DATABASE" >> config/.env
+    echo "DB_PORT=$DB_PORT" >> config/.env
+    echo "DB_HOST=$DB_HOST" >> config/.env
+    echo "DB_USER=$DB_USER" >> config/.env
+    echo "DB_PASS=$DB_PASS" >> config/.env
+
 fi
 
 

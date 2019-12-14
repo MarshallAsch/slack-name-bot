@@ -2,9 +2,13 @@ require('dotenv').config({ path: process.cwd() + '/config/.env' });
 
 const express = require('express');
 const bodyParser = require('body-parser');
+
+const mongoose = require("mongoose");
+
 const onboard = require('./onboard');
 const signature = require('./verifySignature');
 
+const users = require('./models/user');
 const app = express();
 
 /*
@@ -42,6 +46,8 @@ app.post('/events', (req, res) => {
     case 'event_callback': {
       // Verify the signing secret
       if (signature.isVerified(req)) {
+        res.sendStatus(200);
+
         const event = req.body.event;
         console.log(event);
 
@@ -49,15 +55,41 @@ app.post('/events', (req, res) => {
         if (event.type === 'team_join' && !event.is_bot) {
           const { team_id, id } = event.user;
           onboard.initialMessage(team_id, id);
+
+          // this will record the user
+          logUser(event.user, event.type);
         }
 
-        res.sendStatus(200);
+        if (event.type === 'user_change' && !event.is_bot) {
+          // this will record the user
+          logUser(event.user, event.type);
+        }
+
+
       } else { res.sendStatus(500); }
       break;
     }
     default: { res.sendStatus(500); }
   }
 });
+
+
+logUser(user, event) {
+
+    const userRecord = new users.User()
+    .setEvent(event)
+    .setTeamId(user.team_id)
+    .setUserId(user.id)
+    .setUpdated(user.updated)
+    .setEmail(user.profile.email)
+    .setRealName(user.profile.real_name)
+    .setDisplayName(user.profile.display_name)
+    .setDeleted(user.deleted);
+
+
+    return userRecord.save();
+}
+
 
 /*
  * Endpoint to receive events from interactive message on Slack.
@@ -72,6 +104,33 @@ app.post('/interactive', (req, res) => {
     res.send({ text: 'Thank you! The Terms of Service have been accepted.' });
   } else { res.sendStatus(500); }
 });
+
+/* Set up the database connection and start the server */
+const database = config.database;
+let mongoUri = "mongodb://" + process.env.DB_HOST;
+if (Number.isInteger(Number(process.env.DB_PORT))) {
+    mongoUri += ":" + process.env.DB_PORT;
+} else if (process.env.DB_PORT) {
+    logger.warn("Invalid connection port '" + process.env.DB_PORT + "' specified.");
+}
+mongoUri += "/" + process.env.DATABASE;
+mongoose.connect(mongoUri, {
+    user: process.env.DB_USER,
+    pass: process.env.DB_PASS,
+    poolSize: 20,           // maintain up to 20 open sockets at a time
+    useNewUrlParser: true,  // old URL parser is deprecated
+});
+mongoose.connection.on("connected", function () {
+    logger.info("Connected to database: " + mongoUri);
+});
+mongoose.connection.on("error", function(err) {
+    logger.error("Error on connection to " + mongoUri);
+    logger.error(err);
+});
+mongoose.connection.on("disconnected", function () {
+    logger.info("Disconnected from database: " + mongoUri);
+});
+
 
 const server = app.listen(5000, () => {
   console.log('Express server listening on port %d in %s mode', server.address().port, app.settings.env);
