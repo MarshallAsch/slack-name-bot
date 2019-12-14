@@ -74,7 +74,7 @@ app.post('/events', (req, res) => {
 });
 
 
-logUser(user, event) {
+function logUser(user, event) {
 
     const userRecord = new users.User()
     .setEvent(event)
@@ -106,12 +106,11 @@ app.post('/interactive', (req, res) => {
 });
 
 /* Set up the database connection and start the server */
-const database = config.database;
 let mongoUri = "mongodb://" + process.env.DB_HOST;
 if (Number.isInteger(Number(process.env.DB_PORT))) {
     mongoUri += ":" + process.env.DB_PORT;
 } else if (process.env.DB_PORT) {
-    logger.warn("Invalid connection port '" + process.env.DB_PORT + "' specified.");
+    console.log("Invalid connection port '" + process.env.DB_PORT + "' specified.");
 }
 mongoUri += "/" + process.env.DATABASE;
 mongoose.connect(mongoUri, {
@@ -121,14 +120,14 @@ mongoose.connect(mongoUri, {
     useNewUrlParser: true,  // old URL parser is deprecated
 });
 mongoose.connection.on("connected", function () {
-    logger.info("Connected to database: " + mongoUri);
+    console.log("Connected to database: " + mongoUri);
 });
 mongoose.connection.on("error", function(err) {
-    logger.error("Error on connection to " + mongoUri);
-    logger.error(err);
+    console.log("Error on connection to " + mongoUri);
+    console.log(err);
 });
 mongoose.connection.on("disconnected", function () {
-    logger.info("Disconnected from database: " + mongoUri);
+    console.log("Disconnected from database: " + mongoUri);
 });
 
 
