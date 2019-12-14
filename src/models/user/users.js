@@ -94,7 +94,7 @@ class User {
         this._model.update = time;
     }
 
-    setEvent(eent) {
+    setEvent(event) {
         this._model.event = event;
     }
 
