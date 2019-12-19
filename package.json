@@ -15,6 +15,7 @@
     "Tomomi Imura <timura@slack-corp.com>"
   ],
   "dependencies": {
+    "@slack/web-api": "^5.6.0",
     "axios": "^0.18.1",
     "body-parser": "^1.18.3",
     "dotenv": "^4.0.0",

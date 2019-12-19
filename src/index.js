@@ -1,4 +1,6 @@
 require('dotenv').config({ path: process.cwd() + '/config/.env' });
+const axios = require('axios');
+const qs = require('querystring');
 
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -10,6 +12,9 @@ const signature = require('./verifySignature');
 
 const users = require('./models/user');
 const app = express();
+
+const apiUrl = 'https://slack.com/api';
+
 
 /*
  * Parse application/x-www-form-urlencoded && application/json
@@ -74,6 +79,28 @@ app.post('/events', (req, res) => {
 });
 
 
+app.post('/command', (req, res) => {
+  // extract the slash command text, and trigger ID from payload
+  const { text, trigger_id } = req.body;
+
+  // Verify the signing secret
+  if (signature.isVerified(req)) {
+    // create the dialog payload - includes the dialog structure, Slack API token,
+    // and trigger ID
+
+
+    console.log(req.body);
+
+
+    res.json({"response_type": "in_channel"});
+
+  } else {
+    console.log('Verification token mismatch');
+    res.sendStatus(404);
+  }
+});
+
+
 function logUser(user, event) {
 
     const userRecord = new users.User()
@@ -89,6 +116,7 @@ function logUser(user, event) {
 
     return userRecord.save();
 }
+
 
 
 /*

@@ -1,4 +1,4 @@
-# Sending a Welcome Message to a New User 
+# Sending a Welcome Message to a New User
 
 > :sparkles: *Updated October 2018: As we have introduced some new features, this tutorial and the code samples have been updated! All the changes from the previous version of this example, read the [DIFF.md](DIFF.md)*
 
@@ -39,3 +39,22 @@ The user can accept the Terms of Service using message buttons. If a user has be
 #### Enable Interactive Messages
 1. In the app settings, click on Interactive Messages
 1. Set the Request URL to your server or Glitch URL + `/interactive`
+
+
+
+### Setup
+
+To create the mongodb database user run
+
+```
+use slack_users
+db.createUser(
+   {
+     user: "slackBot",
+     pwd: "slackpass",
+     roles: [ "readWrite" ]
+   }
+)
+```
+
+From a mongo shell on the db server.
