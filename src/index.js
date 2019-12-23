@@ -16,6 +16,8 @@ const app = express();
 const apiUrl = 'https://slack.com/api';
 
 
+const ADMIN_CHANNEL_ID = 'CRPEYL338';
+
 /*
  * Parse application/x-www-form-urlencoded && application/json
  * Use body-parser's `verify` callback to export a parsed raw body
@@ -81,18 +83,90 @@ app.post('/events', (req, res) => {
 
 app.post('/command', (req, res) => {
   // extract the slash command text, and trigger ID from payload
-  const { text, trigger_id } = req.body;
+  const { text, team_id, trigger_id, command, channel_id, user_id, response_url } = req.body;
 
   // Verify the signing secret
   if (signature.isVerified(req)) {
     // create the dialog payload - includes the dialog structure, Slack API token,
     // and trigger ID
 
-
     console.log(req.body);
 
 
-    res.json({"response_type": "in_channel"});
+    // first check that it is the correct command
+    if (command != "/whois") {
+        console.log('Not the correct command');
+        return res.sendStatus(404);
+    }
+
+
+    const args = {
+        token: process.env.SLACK_ACCESS_TOKEN,
+        user: user_id,
+    };
+
+    axios.post(`${apiUrl}/users.info`, qs.stringify(args))
+      .then((result) => {
+
+          console.log(result);
+
+          if (!result.user.is_admin) {
+              return res.json({
+                  "response_type": "ephemeral",
+                  "text": "Sorry, you are not authorized for that. "
+              });
+          }
+
+
+          // parse out the userr idea
+
+          var lookupId = text.match(/<@([A-Z0-9]*)\|.+>/gi);
+          if (lookupId == null) {
+              // then the text is not a user id
+
+              return res.json({
+                  "response_type": "ephemeral",
+                  "text": "text is not a userId"
+              });
+          }
+          lookupId = lookupId.split('|')[0].slice(2);
+
+          return users.getUserHistory(lookupId, team_id);
+
+      })
+      .then((history) => {
+
+
+        let text = "```| time | userID | teamID | email | real name | display name |\n";
+
+        text =  history.reduce((a, c) => {
+            return a + "| " + c.updated + " | " + c.userId + " | " + c.teamId + " | " + c.email + " | " + c.realName + " | " + c.displayName + " |\n";
+        }, text)
+
+        text += "```";
+
+        var payload = {
+            text: text,
+        };
+
+
+        if (channel_id != ADMIN_CHANNEL_ID) {
+            payload.response_type = "ephemeral";
+        }
+
+        res.json(payload);
+        //return axios.post(response_url, payload);
+
+      })
+     // .then((result) => {
+        //  console.log("sent message");
+      //})
+      .catch((err) => {
+        console.log('call to get user info failed')
+        res.sendStatus(500);
+      });
+
+    //res.json({"response_type": "in_channel"});
 
   } else {
     console.log('Verification token mismatch');
