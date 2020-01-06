@@ -1,5 +1,5 @@
 require('dotenv').config({ path: process.cwd() + '/config/.env' });
-const axios = require('axios');
+//const axios = require('axios');
 const qs = require('querystring');
 
 const express = require('express');
@@ -13,10 +13,8 @@ const signature = require('./verifySignature');
 const users = require('./models/user');
 const app = express();
 
-const apiUrl = 'https://slack.com/api';
-
-
-const ADMIN_CHANNEL_ID = 'CRPEYL338';
+const { WebClient } = require('@slack/web-api');
+const slackApi = new WebClient(process.env.SLACK_ACCESS_TOKEN);
 
 /*
  * Parse application/x-www-form-urlencoded && application/json
@@ -100,71 +98,63 @@ app.post('/command', (req, res) => {
     }
 
 
-    const args = {
-        token: process.env.SLACK_ACCESS_TOKEN,
-        user: user_id,
-    };
-
-    axios.post(`${apiUrl}/users.info`, qs.stringify(args))
-      .then((result) => {
-
-          console.log(result);
-
-          if (!result.user.is_admin) {
-              return res.json({
-                  "response_type": "ephemeral",
-                  "text": "Sorry, you are not authorized for that. "
-              });
-          }
 
 
-          // parse out the userr idea
+    slackApi.users.info({user: user_id})
+    .then((result) => {
 
-          var lookupId = text.match(/<@([A-Z0-9]*)\|.+>/gi);
-          if (lookupId == null) {
-              // then the text is not a user id
-
-              return res.json({
-                  "response_type": "ephemeral",
-                  "text": "text is not a userId"
-              });
-          }
-          lookupId = lookupId.split('|')[0].slice(2);
-
-          return users.getUserHistory(lookupId, team_id);
-
-      })
-      .then((history) => {
-
-
-        let text = "```| time | userID | teamID | email | real name | display name |\n";
-
-        text =  history.reduce((a, c) => {
-            return a + "| " + c.updated + " | " + c.userId + " | " + c.teamId + " | " + c.email + " | " + c.realName + " | " + c.displayName + " |\n";
-        }, text)
-
-        text += "```";
-
-        var payload = {
-            text: text,
-        };
-
-
-        if (channel_id != ADMIN_CHANNEL_ID) {
-            payload.response_type = "ephemeral";
+        if (!result.user.is_admin) {
+            return res.json({
+                "response_type": "ephemeral",
+                "text": "Sorry, you are not authorized for that. "
+            });
         }
 
-        res.json(payload);
-        //return axios.post(response_url, payload);
+        // parse the userID out of the message
 
-      })
-     // .then((result) => {
-        //  console.log("sent message");
-      //})
-      .catch((err) => {
-        console.log('call to get user info failed')
-        res.sendStatus(500);
-      });
+        var lookupId = text.match(/<@([A-Z0-9]*)\|.+>/gi);
+        if (lookupId == null) {
+            // then the text is not a user id
+
+            return res.json({
+                "response_type": "ephemeral",
+                "text": "text is not a userId"
+            });
+        }
+        lookupId = lookupId[0].split('|')[0].slice(2);
+
+        return users.User.getUserHistory(team_id, lookupId);
+
+
+    })
+    .then((history) => {
+
+
+      let response = "```| time | userID | teamID | email | real name | display name |\n";
+
+      response =  history.reduce((a, c) => {
+          return a + "| " + c.updated + " | " + c.userId + " | " + c.teamId + " | " + c.email + " | " + c.realName + " | " + c.displayName + " |\n";
+      }, response)
+
+      response += "```";
+
+      var payload = {
+          text: response,
+      };
+
+
+      if (channel_id != process.env.ADMIN_CHANNEL_ID) {
+          payload.response_type = "ephemeral";
+      }
+
+      res.json(payload);
+      //return axios.post(response_url, payload);
+
+    })
+    .catch((err) => {
+      console.log('call to get user info failed')
+      res.sendStatus(500);
+    });
 
     //res.json({"response_type": "in_channel"});
 

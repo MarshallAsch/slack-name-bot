@@ -59,7 +59,7 @@ class User {
     }
 
     get updated() {
-        return this._model.update;
+        return this._model.updated;
     }
 
     get event() {
@@ -97,7 +97,7 @@ class User {
     }
 
     setUpdated(time) {
-        this._model.update = time;
+        this._model.updated = time;
         return this;
     }
 

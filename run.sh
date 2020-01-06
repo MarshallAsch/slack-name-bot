@@ -34,6 +34,7 @@ if [ ! -f "config/.env" ]; then
     echo "DB_HOST=$DB_HOST" >> config/.env
     echo "DB_USER=$DB_USER" >> config/.env
     echo "DB_PASS=$DB_PASS" >> config/.env
+    echo "ADMIN_CHANNEL_ID=$ADMIN_CHANNEL_ID" >> config/.env
 
 fi
 
