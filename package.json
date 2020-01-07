@@ -1,28 +1,24 @@
 {
-  "name": "slack-tos-example",
+  "name": "slack-name-bot",
   "private": true,
-  "version": "1.5.0",
-  "description": "Sample Slack app that uses the Events API and interactive messages to send new users a Terms of Service or welcome message",
+  "version": "1.0.0",
+  "description": "This Slack app will keep track of any changes in users names or emails for identification purposes",
   "engines": {
-    "node": ">= 6.9.0"
+    "node": ">= 10.0.0"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node src/index.js"
   },
   "authors": [
-    "Sachin Ranchod <sranchod@slack-corp.com>",
-    "Tomomi Imura <timura@slack-corp.com>"
+    "Marshall Asch <marshallasch@gmail.com>"
   ],
   "dependencies": {
     "@slack/web-api": "^5.6.0",
-    "axios": "^0.18.1",
     "body-parser": "^1.18.3",
     "dotenv": "^4.0.0",
     "express": "^4.16.3",
     "mongoose": "^5.8.1",
-    "node-json-db": "^0.7.3",
-    "querystring": "^0.2.0",
     "tsscmp": "^1.0.6"
   }
 }

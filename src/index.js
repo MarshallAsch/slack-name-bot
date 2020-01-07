@@ -1,14 +1,10 @@
 require('dotenv').config({ path: process.cwd() + '/config/.env' });
 //const axios = require('axios');
-const qs = require('querystring');
 
 const express = require('express');
 const bodyParser = require('body-parser');
 
 const mongoose = require("mongoose");
-
-const onboard = require('./onboard');
-const signature = require('./verifySignature');
 
 const users = require('./models/user');
 const app = express();
