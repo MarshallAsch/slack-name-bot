@@ -34,7 +34,7 @@ const schema = new mongoose.Schema({
         default: false,
     },
     updated: {
-        type: Date,
+        type: Number,
     },
     event: {
         type: String,

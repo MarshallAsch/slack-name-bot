@@ -97,8 +97,17 @@ app.post('/command', (req, res) => {
         return res.sendStatus(404);
     }
 
+    if (text == 'import') {
+        return importUsers()
+        .then(() => {
+            console.log("imported all users");
 
-
+            return res.json({
+                "response_type": "ephemeral",
+                "text": "imported all users."
+            });
+        })
+    }
 
     slackApi.users.info({user: user_id})
     .then((result) => {
@@ -124,36 +133,41 @@ app.post('/command', (req, res) => {
         lookupId = lookupId[0].split('|')[0].slice(2);
 
         return users.User.getUserHistory(team_id, lookupId);
-
-
     })
     .then((history) => {
 
+        let response = "";
 
-      let response = "```| time | userID | teamID | email | real name | display name |\n";
+        if (history.length != 0) {
 
-      response =  history.reduce((a, c) => {
-          return a + "| " + c.updated + " | " + c.userId + " | " + c.teamId + " | " + c.email + " | " + c.realName + " | " + c.displayName + " |\n";
-      }, response)
+            response = "History for userID: " + history[0].userId + "\n" +
+            "```| time | email | real name | display name |\n";
 
-      response += "```";
+            response =  history.reduce((a, c) => {
+                return a + "| " + c.updated.toUTCString() + " | " + c.email + " | " + c.realName + " | " + c.displayName + " |\n";
+            }, response)
 
-      var payload = {
-          text: response,
-      };
+            response += "```";
+        } else {
+            response = "No Details for that user."
+        }
+
+        var payload = {
+            text: response,
+        };
 
 
-      if (channel_id != process.env.ADMIN_CHANNEL_ID) {
-          payload.response_type = "ephemeral";
-      }
+        if (channel_id != process.env.ADMIN_CHANNEL_ID) {
+            payload.response_type = "ephemeral";
+        }
 
-      res.json(payload);
-      //return axios.post(response_url, payload);
-
+        res.json(payload);
+        //return axios.post(response_url, payload);
     })
     .catch((err) => {
-      console.log('call to get user info failed')
-      res.sendStatus(500);
+        console.log('call to get user info failed');
+        console.log(err);
+        res.sendStatus(500);
     });
 
     //res.json({"response_type": "in_channel"});
@@ -181,6 +195,29 @@ function logUser(user, event) {
     return userRecord.save();
 }
 
+// Used to run the import of all users in the workspace
+async function importUsers()  {
+  for await (const page of slackApi.paginate('users.list', )) {
+
+    page.members.forEach((m) => {
+
+        if (!m.is_bot && m.id != 'USLACKBOT') {
+            logUser({
+                id: m.id,
+                team_id: m.team_id,
+                name: m.name,
+                deleted: m.deleted,
+                updated: m.updated,
+                profile : {
+                    email: m.profile.email,
+                    real_name: m.profile.real_name,
+                    display_name: m.profile.display_name
+                    }
+            }, 'import');
+        }
+    })
+  }
+}
 
 
 /*

@@ -58,8 +58,9 @@ class User {
         return this._model.deleted;
     }
 
+    // This will return a Date Object
     get updated() {
-        return this._model.updated;
+        return new Date(this._model.updated * 1000);
     }
 
     get event() {
@@ -96,6 +97,7 @@ class User {
         return this;
     }
 
+    // This expects a unix time stamp integer
     setUpdated(time) {
         this._model.updated = time;
         return this;
