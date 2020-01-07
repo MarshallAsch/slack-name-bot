@@ -97,26 +97,15 @@ app.post('/command', (req, res) => {
         return res.sendStatus(404);
     }
 
-    if (text == 'import') {
-        return importUsers()
-        .then(() => {
-            console.log("imported all users");
-
-            return res.json({
-                "response_type": "ephemeral",
-                "text": "imported all users."
-            });
-        })
-    }
-
     slackApi.users.info({user: user_id})
     .then((result) => {
 
         if (!result.user.is_admin) {
-            return res.json({
+            res.json({
                 "response_type": "ephemeral",
                 "text": "Sorry, you are not authorized for that. "
             });
+            return null
         }
 
         // parse the userID out of the message
@@ -136,33 +125,68 @@ app.post('/command', (req, res) => {
     })
     .then((history) => {
 
-        let response = "";
+        if (history == null) {
+            return;
+        }
+
+        let payload = {};
 
         if (history.length != 0) {
 
-            response = "History for userID: " + history[0].userId + "\n" +
-            "```| time | email | real name | display name |\n";
+            payload = {
+            	"blocks": [
+            		{
+            			"type": "section",
+            			"text": {
+            				"type": "mrkdwn",
+            				"text": `History for:\n*<@${history[0].userId}>* (${history[0].userId})`
+            			}
+            		},
+                ]
+            };
 
-            response =  history.reduce((a, c) => {
-                return a + "| " + c.updated.toUTCString() + " | " + c.email + " | " + c.realName + " | " + c.displayName + " |\n";
-            }, response)
+           history.forEach((h) => {
 
-            response += "```";
+
+               let timeString = "<!date^" + Math.floor( h.updated.getTime() / 1000) + "^{date_num} {time_secs}|" + h.updated.toUTCString() + ">";
+               let item = {
+                   "type": "section",
+                   "fields": [
+                       {
+                           "type": "mrkdwn",
+                           "text": `*Display Name:*\n${h.displayName}`
+                       },
+                       {
+                           "type": "mrkdwn",
+                           "text": `*Real Name:*\n${h.realName}`
+                       },
+                       {
+                           "type": "mrkdwn",
+                           "text": `*Email:*\n${h.email}`
+                       },
+                       {
+                           "type": "mrkdwn",
+                           "text": `*Last Update:*\n${timeString}`
+                       }
+                   ]
+               };
+
+               payload.blocks.push(item, { "type": "divider" });
+           });
+
         } else {
-            response = "No Details for that user."
+            payload = {
+                text: "No Details for that user.",
+            };
         }
 
-        var payload = {
-            text: response,
-        };
-
-
-        if (channel_id != process.env.ADMIN_CHANNEL_ID) {
+        if (channel_id == process.env.ADMIN_CHANNEL_ID) {
+            payload.response_type = "in_channel";
+        } else {
             payload.response_type = "ephemeral";
         }
 
         res.json(payload);
-        //return axios.post(response_url, payload);
     })
     .catch((err) => {
         console.log('call to get user info failed');
@@ -250,6 +274,22 @@ mongoose.connect(mongoUri, {
 });
 mongoose.connection.on("connected", function () {
     console.log("Connected to database: " + mongoUri);
+
+    if (process.env.IMPORT_USERS == 1) {
+        importUsers()
+        .then(() => {
+            console.log("imported all users");
+
+            return res.json({
+                "response_type": "ephemeral",
+                "text": "imported all users."
+            });
+        })
+        .catch((err) => {
+            console.log("error Importing users!");
+        })
+    }
+
 });
 mongoose.connection.on("error", function(err) {
     console.log("Error on connection to " + mongoUri);
