@@ -15,10 +15,12 @@ Any workspace administrator is able to query the history using the slash command
 2. Go to **Bot Users** and click "Add a Bot User" to create a, app bot. Save the change.
 3. Enable Interactive components (See *Enable Interactive Components* below)
 4. Navigate to the **OAuth & Permissions** page and add the following scopes:
-    * `chat:write:bot`
+    * `chat:write`
     * `commands`
     * `users:read`
     * `users:read:email`
+    * `team:read`
+    * `channels:read`
 5. Click 'Save Changes' and install the app (You should get an OAuth access token after the installation)
 6. Enable the events (See *Enable the Events API* below. It doesn't let you  the Request URL until you run the code!)
 7. In your Slack workspace, invite the bot to #general, where the new user will join.
@@ -31,6 +33,9 @@ Any workspace administrator is able to query the history using the slash command
     * Note this will be created by `docker run marshallasch/slack-name-bot` as long as the variables are set
     * `SLACK_ACCESS_TOKEN`: Your app's `xoxb-` token (available on the Install App page, after you install the app to a workspace once.)
     * `SLACK_SIGNING_SECRET`: Your app's Signing Secret (available on the **Basic Information** page)
+    * `SLACK_CLIENT_SECRET`: Your app's Client Secret (available on the **Basic Information** page)
+    * `SLACK_CLIENT_ID`: Your app's ID (available on the **Basic Information** page)
+
     * `DATABASE` the data base name to use
     * `DB_PORT` the mongo db port to connect to (default is 27017)
     * `DB_HOST` the host of the mongo db server
