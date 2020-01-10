@@ -182,7 +182,7 @@ function lookupHistory(req, res, lookupId, slackApi) {
             			"type": "section",
             			"text": {
             				"type": "mrkdwn",
-            				"text": `History for:\n*<${url}${history[0].userId}|@${history[0].display_name}>* (${history[0].userId})`
+            				"text": `History for:\n*<${url}${history[0].userId}|@${history[0].displayName}>* (${history[0].userId})`
             			}
             		},
                 ]
@@ -350,7 +350,7 @@ app.get('/oauth', (req, res) => {
         code: req.query.code
     };
 
-    let installRecotd = null;
+    let installRecord = null;
     (new WebClient()).oauth.access(payload)
     .then((result) => {
 
@@ -378,7 +378,7 @@ app.get('/oauth', (req, res) => {
         if (auth == null) {
             return null;
         }
-        installRecotd = auth;
+        installRecord = auth;
 
         const slackApi = new WebClient(auth.token);
         return slackApi.team.info({team: auth.teamId});
@@ -389,8 +389,8 @@ app.get('/oauth', (req, res) => {
             return null;
         }
 
-        installRecotd.setDomain(result.team.domain);
-        return authRecord.save();
+        installRecord.setDomain(result.team.domain);
+        return installRecord.save();
     })
     .then((record) => {
         // redirect to the slack space
