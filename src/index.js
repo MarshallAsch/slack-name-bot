@@ -9,7 +9,7 @@ const mongoose = require("mongoose");
 const signature = require('./verifySignature');
 const users = require('./models/user');
 const auth = require('./models/auth');
-const settings = require('./models/auth');
+const settings = require('./models/settings');
 
 const app = express();
 
@@ -161,21 +161,11 @@ function lookupHistory(req, res, lookupId, slackApi) {
 
 
     let teamId = req.body.team_id;
-
-    if (lookupId == null) {
-
-        // then the text is not a user id
-        res.json({
-            "response_type": "ephemeral",
-            "text": "text is not a userId"
-        });
-
-        return null;
-    }
+    let channelId = req.body.channel_id;
+    let payload = {};
 
     users.User.getUserHistory(teamId, lookupId)
     .then((history) => {
-        let payload = {};
 
         if (history.length != 0) {
 
@@ -225,7 +215,11 @@ function lookupHistory(req, res, lookupId, slackApi) {
             };
         }
 
-        if (channel_id == process.env.ADMIN_CHANNEL_ID) {
+        return settings.Settings.isAdminChannel(teamId, channelId);
+    })
+    .then((isPublic) => {
+
+        if (isPublic) {
             payload.response_type = "in_channel";
         } else {
             payload.response_type = "ephemeral";
@@ -294,7 +288,7 @@ function listAdminChannel(req, res, slackApi) {
         let promises = [];
 
         channels.forEach((c) => {
-            promises.push(slackApi.conversations.info({channel: c}));
+            promises.push(slackApi.conversations.info({channel: c.adminChannel}));
         });
 
         return Promise.all(promises);
@@ -303,7 +297,7 @@ function listAdminChannel(req, res, slackApi) {
 
         let list = ""
         results.forEach((r) => {
-            list += " *  " + r.name + "\n";
+            list += " *  " + r.channel.name + "\n";
         });
 
         res.json({
@@ -312,7 +306,7 @@ function listAdminChannel(req, res, slackApi) {
         });
     })
     .catch((err) => {
-        console.log('call to get remove channel failed');
+        console.log('call to list admin channels failed');
         console.log(err);
         res.sendStatus(200);
     });

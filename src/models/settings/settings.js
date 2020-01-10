@@ -64,7 +64,7 @@ class Settings {
     static findAllAdminChannels(teamId) {
 
         return SettingModel.find({team_id: teamId})
-        .then((result) => {
+        .then((results) => {
             let channels = [];
 
             results.forEach((result) => {

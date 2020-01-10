@@ -11,13 +11,7 @@ const schema = new mongoose.Schema({
     team_id: {
         type: String,
     },
-    token: {
-        type: String,
-    },
-    team_name: {
-        type: String,
-    },
-    enterprise_id: {
+    admin_channel_id: {
         type: String,
     }
 });
