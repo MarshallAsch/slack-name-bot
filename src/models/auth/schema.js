@@ -26,6 +26,9 @@ const schema = new mongoose.Schema({
     bot_token: {
         type: String,
     },
+    domain: {
+        type: String,
+    },
 });
 
 module.exports = schema;

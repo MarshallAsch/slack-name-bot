@@ -164,7 +164,14 @@ function lookupHistory(req, res, lookupId, slackApi) {
     let channelId = req.body.channel_id;
     let payload = {};
 
-    users.User.getUserHistory(teamId, lookupId)
+    let url = "";
+
+    auth.Auth.getDomainForTeam(teamId)
+    .then((domain) => {
+        url = "https://" + domain + ".slack.com/team/";
+
+        return users.User.getUserHistory(teamId, lookupId);
+    })
     .then((history) => {
 
         if (history.length != 0) {
@@ -175,7 +182,7 @@ function lookupHistory(req, res, lookupId, slackApi) {
             			"type": "section",
             			"text": {
             				"type": "mrkdwn",
-            				"text": `History for:\n*<@${history[0].userId}>* (${history[0].userId})`
+            				"text": `History for:\n*<${url}${history[0].userId}|@${history[0].display_name}>* (${history[0].userId})`
             			}
             		},
                 ]
@@ -343,6 +350,7 @@ app.get('/oauth', (req, res) => {
         code: req.query.code
     };
 
+    let installRecotd = null;
     (new WebClient()).oauth.access(payload)
     .then((result) => {
 
@@ -370,6 +378,7 @@ app.get('/oauth', (req, res) => {
         if (auth == null) {
             return null;
         }
+        installRecotd = auth;
 
         const slackApi = new WebClient(auth.token);
         return slackApi.team.info({team: auth.teamId});
@@ -380,8 +389,12 @@ app.get('/oauth', (req, res) => {
             return null;
         }
 
+        installRecotd.setDomain(result.team.domain);
+        return authRecord.save();
+    })
+    .then((record) => {
         // redirect to the slack space
-        res.redirect('http://' + result.team.domain + '.slack.com');
+        res.redirect('http://' + record.domain + '.slack.com');
     })
     .catch((err) => {
         console.log('call to get oauth failed');

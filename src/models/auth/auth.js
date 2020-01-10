@@ -65,6 +65,15 @@ class Auth {
         return this._model.bot_id;
     }
 
+    get domain() {
+        return this._model.domain;
+    }
+
+    setDomain(domain) {
+        this._model.domain = domain;
+        return this;
+    }
+
     static getTokenForTeam(teamId) {
 
         return AuthModel.findOne({team_id: teamId})
@@ -89,6 +98,14 @@ class Auth {
                 token: result.token,
                 bot_token: result.bot_token
             };
+        });
+    }
+
+    static getDomainForTeam(teamId) {
+
+        return AuthModel.findOne({team_id: teamId})
+        .then((result) => {
+            return result.domain;
         });
     }
 
