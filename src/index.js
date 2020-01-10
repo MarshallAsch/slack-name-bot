@@ -6,6 +6,7 @@ const bodyParser = require('body-parser');
 
 const mongoose = require("mongoose");
 
+const signature = require('./verifySignature');
 const users = require('./models/user');
 const auth = require('./models/auth');
 const settings = require('./models/auth');
