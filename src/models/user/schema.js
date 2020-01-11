@@ -38,7 +38,7 @@ const schema = new mongoose.Schema({
     },
     event: {
         type: String,
-    }
+    },
 });
 
 module.exports = schema;

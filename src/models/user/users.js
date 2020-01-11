@@ -109,10 +109,9 @@ class User {
     }
 
 
-
     static getUserHistory(teamId, userId) {
 
-        return UserModel.find({team_id: teamId, user_id: userId}).sort({update: "asc"})
+        return UserModel.find({team_id: teamId, user_id: userId, }).sort({update: "asc", })
         .then((results) => {
             let history = [];
 

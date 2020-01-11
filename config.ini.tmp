@@ -1,0 +1,40 @@
+
+;; database configuration:
+; slackbot uses MongoDB 4.0.x as a backing store for its data. It is strongly recommended that MongoDB
+; is set up with authentication enabled.
+[database]
+; The name of the database to use
+db = ${DATABSE}
+; The user with readWrite access to the database
+user = ${DB_USER}
+password = ${DB_PASS}
+; The hostname of the mongodb database server
+host = ${DB_HOST}
+; The port that the mongodb server runs on (default: 27017)
+port = ${DB_PORT}
+
+;; slack API configuration:
+; This block sets the application tokens gotten from the https://api.slack.com/apps/ dashboard
+[slack]
+signingSecret = ${SLACK_SIGNING_SECRET}
+clientSecret = ${SLACK_CLIENT_SECRET}
+clientId = ${SLACK_CLIENT_ID}
+
+;; log configuration
+; This block allows customization of certain logging parameters.
+[logs]
+; The logdir is the directory where log files will be stored on the disk.
+logdir = /tmp/slackbot_logs
+; Toggles stacktraces in logs.
+stacktraces = true
+
+
+;; server configuration:
+; This block allows customization of certain server operation parameters.
+[server]
+; The operation mode for the server. This controls miscellaneous settings, in
+; particular the method and verbosity of logging. One of
+;  - production
+;  - development
+;  - test
+mode = ${SEVER_MODE}

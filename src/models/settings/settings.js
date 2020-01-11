@@ -46,7 +46,7 @@ class Settings {
 
     static isAdminChannel(teamId, channelId) {
 
-        return SettingModel.findOne({team_id: teamId, admin_channel_id: channelId})
+        return SettingModel.findOne({team_id: teamId, admin_channel_id: channelId, })
         .then((result) => {
             return result != null;
         });
@@ -55,7 +55,7 @@ class Settings {
     // remove the channel from the list
     static removeChannel(teamId, channelId) {
 
-        return SettingModel.findOneAndDelete({team_id: teamId, admin_channel_id: channelId})
+        return SettingModel.findOneAndDelete({team_id: teamId, admin_channel_id: channelId, })
         .then((result) => {
             return result;
         });
@@ -63,7 +63,7 @@ class Settings {
 
     static findAllAdminChannels(teamId) {
 
-        return SettingModel.find({team_id: teamId})
+        return SettingModel.find({team_id: teamId, })
         .then((results) => {
             let channels = [];
 
@@ -76,7 +76,6 @@ class Settings {
             return channels;
         });
     }
-
 
 
     /**

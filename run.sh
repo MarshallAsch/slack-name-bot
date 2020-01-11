@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Create the config file if it does not yet exist
-if [ ! -f "config/.env" ]; then
-    echo "config/.env does not exist. Creating"
+if [ ! -f "config/config.ini" ]; then
+    echo "config/config.ini does not exist. Creating"
 
     if [ -z "$SLACK_SIGNING_SECRET" ]
     then
@@ -29,17 +29,11 @@ if [ ! -f "config/.env" ]; then
         exit 1
     fi
 
-    echo "SLACK_SIGNING_SECRET=$SLACK_SIGNING_SECRET" >> config/.env
-    echo "SLACK_CLIENT_SECRET=$SLACK_CLIENT_SECRET" >> config/.env
-    echo "SLACK_CLIENT_ID=$SLACK_CLIENT_ID" >> config/.env
-    echo "DATABASE=$DATABASE" >> config/.env
-    echo "DB_PORT=$DB_PORT" >> config/.env
-    echo "DB_HOST=$DB_HOST" >> config/.env
-    echo "DB_USER=$DB_USER" >> config/.env
-    echo "DB_PASS=$DB_PASS" >> config/.env
+
+    # generate config file
+    eval "echo \"$(cat config.ini.tmp)\" > config/config.ini"
 
 fi
-
 
 
 # start the server
