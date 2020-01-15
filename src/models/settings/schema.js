@@ -13,7 +13,7 @@ const schema = new mongoose.Schema({
     },
     admin_channel_id: {
         type: String,
-    }
+    },
 });
 
 module.exports = schema;

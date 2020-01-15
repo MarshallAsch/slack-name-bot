@@ -28,7 +28,7 @@ class Auth {
             token: token,
             team_name: teamName,
             bot_id: botId,
-            bot_token: botToken
+            bot_token: botToken,
         });
     }
 
@@ -76,7 +76,7 @@ class Auth {
 
     static getTokenForTeam(teamId) {
 
-        return AuthModel.findOne({team_id: teamId})
+        return AuthModel.findOne({team_id: teamId, })
         .then((result) => {
             return result.token;
         });
@@ -84,7 +84,7 @@ class Auth {
 
     static getBotTokenForTeam(teamId) {
 
-        return AuthModel.findOne({team_id: teamId})
+        return AuthModel.findOne({team_id: teamId, })
         .then((result) => {
             return result.bot_token;
         });
@@ -92,18 +92,18 @@ class Auth {
 
     static getTokensForTeam(teamId) {
 
-        return AuthModel.findOne({team_id: teamId})
+        return AuthModel.findOne({team_id: teamId, })
         .then((result) => {
             return {
                 token: result.token,
-                bot_token: result.bot_token
+                bot_token: result.bot_token,
             };
         });
     }
 
     static getDomainForTeam(teamId) {
 
-        return AuthModel.findOne({team_id: teamId})
+        return AuthModel.findOne({team_id: teamId, })
         .then((result) => {
             return result.domain;
         });
