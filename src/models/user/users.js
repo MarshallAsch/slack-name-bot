@@ -134,7 +134,7 @@ class User {
     }
 
     // return true if they are duplicates
-    static checkDuplicate(previous, current) {
+    checkDuplicate(previous, current) {
 
         if (!previous) {
             return false;
