@@ -115,14 +115,37 @@ class User {
         .then((results) => {
             let history = [];
 
+            let last = null;
+
             results.forEach((result) => {
                 let u = new User();
                 u._model = result;
-                history.push(u);
+
+
+                if (User.checkDuplicate(last, u) == false) {
+                    history.push(u);
+                }
+
+                last = u;
             });
 
             return history;
         });
+    }
+
+    // return true if they are duplicates
+    static checkDuplicate(previous, current) {
+
+        if (!previous) {
+            return false;
+        }
+
+        if (previous.email === current.email
+                && previous.realName === current.realName
+                && previous.displayName === current.displayName) {
+            return true
+        }
+        return false;
     }
 
     /**

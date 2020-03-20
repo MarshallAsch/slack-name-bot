@@ -103,7 +103,7 @@ app.post("/command", (req, res) => {
         //send initial acknoledgement
         res.json({
             "response_type": "ephemeral",
-            "text": "I will get back to you with that shortly...."
+            "text": `${command} ${text}\nI will get back to you with that shortly....`
         });
 
         let slackApi = null;
