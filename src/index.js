@@ -100,6 +100,12 @@ app.post("/command", (req, res) => {
             return res.sendStatus(200);
         }
 
+        //send initial acknoledgement
+        res.json({
+            "response_type": "ephemeral",
+            "text": "I will get back to you with that shortly...."
+        });
+
         let slackApi = null;
         let slackBotApi = null;
         auth.Auth.getTokensForTeam(team_id)
@@ -112,42 +118,38 @@ app.post("/command", (req, res) => {
         .then((result) => {
 
             if (!result.user.is_admin) {
-                res.json({
+                sendResponse(response_url, {
                     "response_type": "ephemeral",
-                    "text": "Sorry, you are not authorized for that. ",
+                    "text": "Sorry, you are not authorized for that.",
                 });
+
                 return null;
             }
 
             if (text === "import") {
-                res.json({
-                    "response_type": "ephemeral",
-                    "text": "Importing all users."
-                });
                 return importAllUsers(req, response_url, slackApi);
             } if (text === "add") {
-                return addAdminChannel(req, res);
+                return addAdminChannel(req);
             } if (text === "list") {
-                return listAdminChannel(req, res, slackBotApi);
+                return listAdminChannel(req, slackBotApi);
             } if (text === "remove") {
-                return removeAdminChannel(req, res);
+                return removeAdminChannel(req);
             } if (userIdRegex.test(text)) {
                 let lookupId = userIdRegex.exec(text);
-
-                res.json({
-                    "response_type": "ephemeral",
-                    "text": "Looking up history for user."
-                });
                 return lookupHistory(req, response_url, lookupId);
             }
             // print help message
-            return help(req, res);
+            return help(req);
 
         })
         .catch((err) => {
             logger.info("call to get user info failed");
             logger.info(err);
-            res.sendStatus(200);
+
+            sendResponse(response_url, {
+                "response_type": "ephemeral",
+                "text": "Sorry, Something went wrong.",
+            });
         });
     } else {
         logger.info("Verification token mismatch");
@@ -265,7 +267,7 @@ function lookupHistory(req, response_url, lookupId) {
 
 // Must invite @namebot to the channel first
 // this must be run from the channel that you wish to add to the list
-function addAdminChannel(req, res) {
+function addAdminChannel(req) {
 
     let teamId = req.body.team_id;
     let channelId = req.body.channel_id;
@@ -275,19 +277,24 @@ function addAdminChannel(req, res) {
     channel.save()
     .then(() => {
 
-        res.json({
-            text: "Channel added to the list.",
-            response_type: "ephemeral",
+        sendResponse(response_url, {
+            "response_type": "ephemeral",
+            "text": "Channel added to the list.",
         });
+
     })
     .catch((err) => {
         logger.info("call to get add channel failed");
         logger.info(err);
-        res.sendStatus(200);
+
+        sendResponse(response_url, {
+            "response_type": "ephemeral",
+            "text": "call to get add channel failed",
+        });
     });
 }
 
-function removeAdminChannel(req, res) {
+function removeAdminChannel(req) {
 
     let teamId = req.body.team_id;
     let channelId = req.body.channel_id;
@@ -295,19 +302,22 @@ function removeAdminChannel(req, res) {
     settings.Settings.removeChannel(teamId, channelId)
     .then(() => {
 
-        res.json({
-            text: "Channel removed from the list.",
-            response_type: "ephemeral",
+        sendResponse(response_url, {
+            "response_type": "ephemeral",
+            "text": "Channel removed from the list.",
         });
     })
     .catch((err) => {
         logger.info("call to get remove channel failed");
         logger.info(err);
-        res.sendStatus(200);
+        sendResponse(response_url, {
+            "response_type": "ephemeral",
+            "text": "call to get remove channel failed",
+        });
     });
 }
 
-function listAdminChannel(req, res, slackApi) {
+function listAdminChannel(req, slackApi) {
 
     let teamId = req.body.team_id;
 
@@ -329,19 +339,23 @@ function listAdminChannel(req, res, slackApi) {
             list += " *  " + r.channel.name + "\n";
         });
 
-        res.json({
-            text: "Channels where the response is public: \n\n" + list,
-            response_type: "ephemeral",
+        sendResponse(response_url, {
+            "response_type": "ephemeral",
+            "text": "Channels where the response is public: \n\n" + list,
         });
     })
     .catch((err) => {
         logger.info("call to list admin channels failed");
         logger.info(err);
-        res.sendStatus(200);
+
+        sendResponse(response_url, {
+            "response_type": "ephemeral",
+            "text": "call to list admin channels failed",
+        });
     });
 }
 
-function help(req, res) {
+function help(req) {
 
     const supportMessage
     = "To use the application send `/whois [help, import, @user, add #channel, remove #channel]`\n"
@@ -352,11 +366,11 @@ function help(req, res) {
     + "`/whois import` - will import all the current users names and emails into the database. (run this the first time the app is run)\n"
     + "By default the message is only shown to the user who sent the command. The only users who can use this app are workspace admins.\n";
 
-    res.json({
+
+    sendResponse(response_url, {
         "response_type": "ephemeral",
         "text": supportMessage,
     });
-
 }
 
 // this  will exchange the code for an oauth token so the app can be installed in multiple work spaces
