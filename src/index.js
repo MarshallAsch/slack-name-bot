@@ -1,4 +1,5 @@
-//const axios = require('axios');
+const axios = require('axios');
+const qs = require('querystring');
 
 const source = require("rfr");
 
@@ -119,7 +120,11 @@ app.post("/command", (req, res) => {
             }
 
             if (text === "import") {
-                return importAllUsers(req, res, slackApi);
+                res.json({
+                    "response_type": "ephemeral",
+                    "text": "Importing all users."
+                });
+                return importAllUsers(req, response_url, slackApi);
             } if (text === "add") {
                 return addAdminChannel(req, res);
             } if (text === "list") {
@@ -129,7 +134,11 @@ app.post("/command", (req, res) => {
             } if (userIdRegex.test(text)) {
                 let lookupId = userIdRegex.exec(text);
 
-                return lookupHistory(req, res, lookupId);
+                res.json({
+                    "response_type": "ephemeral",
+                    "text": "Looking up history for user."
+                });
+                return lookupHistory(req, response_url, lookupId);
             }
             // print help message
             return help(req, res);
@@ -147,26 +156,29 @@ app.post("/command", (req, res) => {
 });
 
 
-function importAllUsers(req, res, slackApi) {
+function importAllUsers(req, response_url, slackApi) {
 
     importUsers(slackApi)
     .then((result) => {
 
-        // message has already been sent
-        return res.json({
+        sendResponse(response_url, {
             "response_type": "ephemeral",
             "text": `${result.numUsers} Have been imported.`,
         });
+        // message has already been sent
+        return
     })
     .catch((err) => {
         logger.info("import users failed");
         logger.info(err);
-        res.sendStatus(200);
+        sendResponse(response_url, {
+            "response_type": "ephemeral",
+            "text": `Failed to import users`,
+        });
     });
 }
 
-function lookupHistory(req, res, lookupId) {
-
+function lookupHistory(req, response_url, lookupId) {
 
     let teamId = req.body.team_id;
     let channelId = req.body.channel_id;
@@ -240,12 +252,14 @@ function lookupHistory(req, res, lookupId) {
             payload.response_type = "ephemeral";
         }
 
-        res.json(payload);
+
+        sendResponse(response_url, payload);
     })
     .catch((err) => {
         logger.info("call to get user info failed");
         logger.info(err);
-        res.sendStatus(200);
+        sendResponse(response_url, {"response_type":"ephemeral", "text": "Error looking up user." });
+
     });
 }
 
@@ -428,7 +442,7 @@ function logUser(user, event) {
 }
 
 // Used to run the import of all users in the workspace
-// FIXME:  this function is bad, not sure if it compleetes before it returns
+// FIXME:  this function is bad, not sure if it completes before it returns
 async function importUsers(slackApi) {
 
 
@@ -457,6 +471,19 @@ async function importUsers(slackApi) {
     return {numUsers: numUsers, };
 }
 
+
+function sendResponse(url, payload) {
+
+    axios.post(url, payload,{ headers: { 'content-type': 'application/json' }})
+    .then(function (response) {
+        logger.info("sucessfully posted response");
+    })
+    .catch(function (error) {
+        logger.info(error);
+    });
+    return;
+
+}
 
 /* Set up the database connection and start the server */
 const database = config.database;
