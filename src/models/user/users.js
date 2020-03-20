@@ -122,7 +122,7 @@ class User {
                 u._model = result;
 
 
-                if (checkDuplicate(last, u) == false) {
+                if (User.checkDuplicate(last, u) == false) {
                     history.push(u);
                 }
 
@@ -134,7 +134,7 @@ class User {
     }
 
     // return true if they are duplicates
-    checkDuplicate(previous, current) {
+    static checkDuplicate(previous, current) {
 
         if (!previous) {
             return false;
