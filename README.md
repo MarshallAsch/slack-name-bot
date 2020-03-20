@@ -15,7 +15,8 @@ Any workspace administrator is able to query the history using the slash command
 2. Go to **Bot Users** and click "Add a Bot User" to create a, app bot. Save the change.
 3. Enable Interactive components (See *Enable Interactive Components* below)
 4. Navigate to the **OAuth & Permissions** page and add the following scopes:
-    * `chat:write`
+    * `bot`
+    * `chat:write:bot`
     * `commands`
     * `users:read`
     * `users:read:email`
@@ -29,7 +30,7 @@ Any workspace administrator is able to query the history using the slash command
 1. Get the code
     * Either clone this repo and run `npm install`
     * Or run it as a docker container `docker pull marshallasch/slack-name-bot`
-2. Set the following environment variables to `.env` (see `.env.sample`):
+2. Set the following environment variables to `config.ini` (see `config.ini.tmp`):
     * Note this will be created by `docker run marshallasch/slack-name-bot` as long as the variables are set
     * `SLACK_ACCESS_TOKEN`: Your app's `xoxb-` token (available on the Install App page, after you install the app to a workspace once.)
     * `SLACK_SIGNING_SECRET`: Your app's Signing Secret (available on the **Basic Information** page)
@@ -41,8 +42,6 @@ Any workspace administrator is able to query the history using the slash command
     * `DB_HOST` the host of the mongo db server
     * `DB_USER` the mongo db user name
     * `DB_PASS` the plain text mogodb password
-    * `ADMIN_CHANNEL_ID` the admin channel ID (NOT channel name) to display the messages publicly in
-    * `IMPORT_USERS` if set to 1 then it will import all users from the slack workspace
 3. If you're running the app locally:
     * Start the app (`npm start`)
 
@@ -56,12 +55,6 @@ Any workspace administrator is able to query the history using the slash command
 1. Set the Request URL to your server (*e.g.* `https://yourname.ngrok.com`) + `/command`
 1. On the same page, set the command name to `/whois` and the description
 1. On the same page, check the `Escape channels, users, and links sent to your app` checkbox
-
-
-#### Enable Interactive Messages
-1. In the app settings, click on Interactive Messages
-1. Set the Request URL to your server or Glitch URL + `/interactive`
-
 
 
 ### Requirements
