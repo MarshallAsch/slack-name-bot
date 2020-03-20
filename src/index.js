@@ -129,17 +129,17 @@ app.post("/command", (req, res) => {
             if (text === "import") {
                 return importAllUsers(req, response_url, slackApi);
             } if (text === "add") {
-                return addAdminChannel(req);
+                return addAdminChannel(req, response_url);
             } if (text === "list") {
-                return listAdminChannel(req, slackBotApi);
+                return listAdminChannel(req, response_url, slackBotApi);
             } if (text === "remove") {
-                return removeAdminChannel(req);
+                return removeAdminChannel(req, response_url);
             } if (userIdRegex.test(text)) {
                 let lookupId = userIdRegex.exec(text);
                 return lookupHistory(req, response_url, lookupId);
             }
             // print help message
-            return help(req);
+            return help(req, response_url);
 
         })
         .catch((err) => {
@@ -267,7 +267,7 @@ function lookupHistory(req, response_url, lookupId) {
 
 // Must invite @namebot to the channel first
 // this must be run from the channel that you wish to add to the list
-function addAdminChannel(req) {
+function addAdminChannel(req, response_url) {
 
     let teamId = req.body.team_id;
     let channelId = req.body.channel_id;
@@ -294,7 +294,7 @@ function addAdminChannel(req) {
     });
 }
 
-function removeAdminChannel(req) {
+function removeAdminChannel(req, response_url) {
 
     let teamId = req.body.team_id;
     let channelId = req.body.channel_id;
@@ -317,7 +317,7 @@ function removeAdminChannel(req) {
     });
 }
 
-function listAdminChannel(req, slackApi) {
+function listAdminChannel(req, response_url, slackApi) {
 
     let teamId = req.body.team_id;
 
@@ -355,7 +355,7 @@ function listAdminChannel(req, slackApi) {
     });
 }
 
-function help(req) {
+function help(req, response_url) {
 
     const supportMessage
     = "To use the application send `/whois [help, import, @user, add #channel, remove #channel]`\n"
